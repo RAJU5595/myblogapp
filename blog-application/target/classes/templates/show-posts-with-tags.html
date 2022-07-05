@@ -1,0 +1,95 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog</title>
+</head>
+<body>
+    <div style="padding:20px;">
+        <div style="display:flex;justify-content:space-between;">
+            <h1>My Blog Application</h1>
+            <div style="padding:15px;width:400px;">
+                <form th:action="@{'/page/'+${currentPage}+'/filters?'+'search='+${tagSearch}+'&sortOrder='+${tagSortOrder}}">
+                    <input placeholder="search" th:value="${tagSearch}" name="tagSearch" type="search" onchange="this.form.submit()" /><br><br>
+                    <span>Sort By Published Date :</span>
+                    <select name="tagSortOrder" style="height:30px;width:30%;" onchange="this.form.submit()">
+                        <option>select</option>
+                        <option th:value="'asc'">asc</a></option>
+                        <option th:value="'desc'">desc</a></option>
+                    </select>
+                </form>
+                <a  th:href="@{/login}"><button style="width:100px;height:30px;" th:if="${loggedInUser}==False">Login</button></a>
+                <a th:href="@{/logout}"><button style="width:100px;height:30px;" th:if="${loggedInUser}==True">Logout</button></a>
+            </div>
+        </div>
+        <br>
+        <div style="display:flex;flex-wrap:wrap;">
+            <div style="width:15vw;margin-right:20px;">
+                <h3>Filters</h3>
+                <form th:action="@{'/page/'+${currentPage}+'/filters?'+'&search='+${tagSearch}+'&tagSortOrder='+${tagSortOrder}+'&'(tagId=${tagId})}">
+                    <div>
+                        <h3>Tags</h3>
+                        <p th:each="tag : ${savedTags}">
+                            <span th:if="${#lists.contains(activeTags,tag.id)}">
+                                <input th:checked="true" name="tagId" th:text="${tag.name}" th:value="${tag.id}" type="checkbox"/>
+                            </span>
+                            <span th:if="!${#lists.contains(activeTags,tag.id)}">
+                                <input th:checked="false" name="tagId" th:text="${tag.name}" th:value="${tag.id}" type="checkbox"/>
+                            </span>
+                        </p>
+                        <h3>Authors</h3>
+                        <p th:each="author : ${authors}">
+                            <span th:if="${#lists.contains(activeAuthorIds,author.id)}">
+                                <input th:checked="true" name="authorId" th:text="${author.name}" th:value="${author.id}" type="checkbox"/>
+                            </span>
+                            <span th:if="!${#lists.contains(activeAuthorIds,author.id)}">
+                                <input th:checked="false" name="authorId" th:text="${author.name}" th:value="${author.id}" type="checkbox"/>
+                            </span>
+                        </p>
+                        <button type="submit">Apply</button>
+                        <a th:href="@{/}"><button type="button">Clear All</button></a>
+                    </div>
+                </form>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;max-width:70vw;">
+                <div th:each="post:${posts}" style="min-width:500px;">
+                    <a th:href="@{/post{id}(id=${post.id})}" style="text-decoration:none;color:black;">
+                        <div style="width:30vw;border:2px solid black;margin:10px;padding:10px;">
+                            <h3 th:text="${post.title}"></h3>
+                            <span style="color:red;float:right;" th:if="${post.publishedAt==null}">Draft,Saved</span><br>
+                            <span th:text="${post.author}+', '"></span>
+                            <span th:text="${#dates.format(post.publishedAt, 'dd/MM/yyyy')}"></span><br>
+                            <p th:text="${post.excerpt}"></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div th:if = "${totalPages>1}">
+            <div>
+                TotalPosts : [[${allPosts}]]
+            </div>
+            <div style="display:flex;margin:auto;width:350px;">
+                <div style="margin-right:10px;">
+                    <span th:if = "${currentPage <= totalPages}">
+                        <a th:if ="${currentPage > 1}" th:href="@{'/page/'+${currentPage-1}+'/filters?'+'tagSearch='+${tagSearch}+'&tagSortOrder='+${tagSortOrder}+'&'(tagId=${tagId})}">Previous</a>
+                        <span th:unless ="${currentPage > 1}">Previous</span>
+                    </span>
+                </div>
+                <div style="margin-right:10px;">
+                    <span th:each = "i: ${#numbers.sequence(1,totalPages)}">
+                        <a th:if="${currentPage != i}" th:href="@{'/page/'+${i}++'/filters?'+'tagSearch='+${tagSearch}+'&tagSortOrder='+${tagSortOrder}+'&'(tagId=${tagId})}">[[${i}]]</a>
+                        <span th:unless="${currentPage != i}">[[${i}]]</span>
+                    </span>
+                </div>
+                <span style="margin-right:10px;">....</span>
+                <div style="margin-right:10px;">
+                    <a th:if = "${currentPage < totalPages}" th:href="@{'/page/'+${currentPage+1}+'/filters?'+'tagSearch='+${tagSearch}+'&tagSortOrder='+${tagSortOrder}+'&'(tagId=${tagId})}">Next</a>
+                    <span th:unless ="${currentPage < totalPages}">Next</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

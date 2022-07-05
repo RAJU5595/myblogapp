@@ -1,0 +1,80 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html>
+    <body>
+        <div style="padding:20px;">
+        <div>
+            <div style="display:flex;justify-content:space-between;">
+                <h2>My Blog Application</h2>
+                <div>
+                    <a  th:href="@{/login}"><button style="width:100px;height:30px;" th:if="${loggedInUser}==False">Login</button></a>
+                    <a  th:href="@{/logout}"><button style="width:100px;height:30px;" th:if="${loggedInUser}==True">Logout</button></a>
+                </div>
+            </div>
+            <h1 th:text="${post.title}" style="text-align:center;font-size:50px;"></h1>
+            <div style="text-align:center;font-size:20px;"><span th:text="${post.author}+', '"></span>
+                <span th:text="${#dates.format(post.publishedAt, 'dd/MM/yyyy')}"></span><br>
+            </div>
+            <br>
+            <p style="font-size:20px;width:85vw;margin:auto;" th:text="${post.content}"></p>
+            <br><br>
+            <div th:if="${post.author==loggedInUsername || loggedInUserRole=='ADMIN'}">
+                <form th:action="@{/post{id}(id=${post.id})}" method="post" style="text-align:center;"><button style="width:100px;height:30px;" type="submit">Edit Post</button></form>
+                <form th:action="@{deletePost/{id}(id=${post.id})}" method="post" style="text-align:center;"><button style="width:100px;height:30px;" type="submit">Delete Post</button></form>
+                <span th:if="${post.isPublished == False}">
+                    <form th:action="@{/publishPost{id}(id=${post.id})}" method="post" style="text-align:center;"><button style="width:100px;height:30px;" type="submit">Publish Post</button></form>
+                </span>
+            </div>
+            <div>
+                <h3>Tags Used</h3>
+                <div th:each="userTag : ${postTags}">
+                    <button style="width:100px;height:30px;margin-bottom:5px;" th:text="${userTag.name}"></button>
+                </div>
+            </div>
+            <span th:if="${post.isPublished == True}">
+                <h3>Comments</h3>
+                <div th:each="userComment:${comments}">
+                    <div style="display:flex; margin:20px;">
+                        <div style="padding:10px;">
+                            Created by : <span style="font-weight:bold;" th:text="${userComment.name}"></span><br>
+                            <br>
+                            created at :<span style="color:#585c5a;" th:text="${#dates.format(userComment.createdAt, 'E, MMM dd yyyy HH:mm:ss')}"></span><br>
+                            updated at :<span style="color:#585c5a;"     th:text="${#dates.format(userComment.updatedAt, 'E, MMM dd yyyy HH:mm:ss')}"></span>
+                        </div>
+                        <div style="background-color:#d9dedb;padding:10px;width:30vw;">
+                            <span th:if="${oldCommentId != userComment.id}">
+                                <p th:text="${userComment.comment}"></p>
+                            </span>
+                            <div th:if="${post.author==loggedInUsername || loggedInUserRole=='ADMIN'}">
+                                <span th:if="${oldCommentId == userComment.id}">
+                                    <form th:action="@{/post{id1}/updateComment{id2}(id1=${post.id},id2=${userComment.id})}" method="post">
+                                        <textarea name="newComment" th:text="${oldCommentMessage}" rows="4"  type="text"></textarea><br>
+                                        <button type="submit">Update</button>
+                                    </form>
+                                </span>
+                                <div style="display:flex;">
+                                    <a th:href="@{/post{id1}/editComment{id2}(id1=${post.id},id2=${userComment.id})}" method="post">
+                                        <button>Edit</button>
+                                    </a>
+                                    <a th:href="@{/post{id1}/deleteComment{id2}(id1=${post.id},id2=${userComment.id})}" method="post">
+                                        <button type="submit">Delete</button>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3>Leave a Comment</h3>
+                    <form th:action="@{post{id}/addComment(id=${post.id})}" method="post">
+                        Name   :<br><input type="text" style="width:20vw;margin-bottom:10px;" name="name" /><br>
+                        Email  :<br><input type="text" style="width:20vw;margin-bottom:10px;"  name="email" /><br>
+                        Comment :<br><textarea rows="7" style="width:20vw;margin-bottom:10px;" name="comment"></textarea>
+                        <br/><button type="submit">Add</button>
+                    </form>
+                </div>
+                </span>
+            </div>
+    </div>
+    </body>
+</html>
